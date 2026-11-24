@@ -1,0 +1,9 @@
+Package: com.nova.modmenu
+Name: Nova Mod Menu
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Floating archive manager overlay for Null's Brawl.
+Maintainer: Nova
+Author: Nova
+Section: Tweaks
+Depends: mobilesubstrate
