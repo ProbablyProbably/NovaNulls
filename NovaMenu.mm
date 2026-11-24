@@ -54,49 +54,88 @@ static NSString * const kNovaMods = @"com.nova.modmenu.mods";
 }
 
 - (void)buildPanel {
-    CGFloat w = MIN(390, UIScreen.mainScreen.bounds.size.width - 36);
-    self.panel = [[UIView alloc] initWithFrame:CGRectMake(92, 110, w, 390)];
+    self.panel = [[UIView alloc] initWithFrame:CGRectZero];
     self.panel.backgroundColor = [UIColor colorWithRed:0.055 green:0.075 blue:0.12 alpha:0.97];
     self.panel.layer.cornerRadius = 16;
     self.panel.layer.borderWidth = 1;
     self.panel.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.22].CGColor;
     [self.view addSubview:self.panel];
 
-    UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(16, 10, w-32, 30)];
+    UILabel *title = [[UILabel alloc] initWithFrame:CGRectZero];
+    title.tag = 401;
     title.text = @"NOVA  •  MOD MANAGER";
     title.textColor = UIColor.whiteColor;
     title.font = [UIFont boldSystemFontOfSize:16];
     [self.panel addSubview:title];
 
-    UIButton *close = [self button:@"×" frame:CGRectMake(w-42, 7, 34, 32)];
+    UIButton *close = [self button:@"×" frame:CGRectZero];
+    close.tag = 402;
+    close.titleLabel.font = [UIFont systemFontOfSize:25 weight:UIFontWeightRegular];
     [close addTarget:self action:@selector(togglePanel) forControlEvents:UIControlEventTouchUpInside];
     [self.panel addSubview:close];
 
-    UIButton *import = [self button:@"＋ Import .NullsBrawlAssets" frame:CGRectMake(14, 48, w-28, 38)];
+    UIButton *import = [self button:@"＋ Import .NullsBrawlAssets" frame:CGRectZero];
+    import.tag = 403;
     [import addTarget:self action:@selector(importArchive) forControlEvents:UIControlEventTouchUpInside];
     [self.panel addSubview:import];
 
-    self.status = [[UILabel alloc] initWithFrame:CGRectMake(16, 90, w-32, 22)];
+    self.status = [[UILabel alloc] initWithFrame:CGRectZero];
+    self.status.tag = 405;
     self.status.textColor = [UIColor colorWithWhite:0.78 alpha:1];
-    self.status.font = [UIFont systemFontOfSize:11];
+    self.status.font = [UIFont systemFontOfSize:12];
+    self.status.adjustsFontSizeToFitWidth = YES;
+    self.status.minimumScaleFactor = 0.8;
     self.status.text = @"Imported archives are stored in this app's Documents folder.";
     [self.panel addSubview:self.status];
 
-    UIScrollView *scroll = [[UIScrollView alloc] initWithFrame:CGRectMake(12, 116, w-24, 220)];
-    scroll.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self.panel addSubview:scroll];
-    self.list = [[UIStackView alloc] initWithFrame:CGRectMake(0, 0, w-24, 1)];
-    self.list.axis = UILayoutConstraintAxisVertical;
-    self.list.spacing = 7;
-    [scroll addSubview:self.list];
+    UIScrollView *scroll = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scroll.tag = 404;
+    scroll.alwaysBounceVertical = YES;
+    scroll.showsVerticalScrollIndicator = YES;
+    [self.panel addSubview:scroll];
+    self.list = [[UIStackView alloc] initWithFrame:CGRectZero];
+    self.list.axis = UILayoutConstraintAxisVertical;
+    self.list.spacing = 8;
+    self.list.translatesAutoresizingMaskIntoConstraints = NO;
+    [scroll addSubview:self.list];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.list.topAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.topAnchor constant:2],
+        [self.list.leadingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.leadingAnchor],
+        [self.list.trailingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.trailingAnchor],
+        [self.list.bottomAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.bottomAnchor constant:-2],
+        [self.list.widthAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.widthAnchor]
+    ]];
 
-    UIButton *settings = [self button:@"Settings" frame:CGRectMake(14, 344, (w-36)/2, 32)];
+    UIButton *settings = [self button:@"Settings" frame:CGRectZero];
+    settings.tag = 406;
     [settings addTarget:self action:@selector(showSettings) forControlEvents:UIControlEventTouchUpInside];
     [self.panel addSubview:settings];
-    UIButton *hide = [self button:@"Hide menu" frame:CGRectMake(22+(w-36)/2, 344, (w-36)/2, 32)];
+    UIButton *hide = [self button:@"Hide menu" frame:CGRectZero];
+    hide.tag = 407;
     [hide addTarget:self action:@selector(togglePanel) forControlEvents:UIControlEventTouchUpInside];
     [self.panel addSubview:hide];
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    CGFloat safeTop = self.view.safeAreaInsets.top;
+    CGFloat safeBottom = self.view.safeAreaInsets.bottom;
+    CGFloat viewW = CGRectGetWidth(self.view.bounds);
+    CGFloat viewH = CGRectGetHeight(self.view.bounds);
+    CGFloat panelW = MIN(390.0, MAX(260.0, viewW - 24.0));
+    CGFloat panelH = MIN(440.0, MAX(300.0, viewH - safeTop - safeBottom - 24.0));
+    self.panel.frame = CGRectMake((viewW - panelW) / 2.0, safeTop + 12.0, panelW, panelH);
+    self.bubble.frame = CGRectMake(18.0, safeTop + 72.0, 58.0, 58.0);
+
+    [self.panel viewWithTag:401].frame = CGRectMake(16, 10, panelW - 66, 30);
+    [self.panel viewWithTag:402].frame = CGRectMake(panelW - 48, 5, 40, 40);
+    [self.panel viewWithTag:403].frame = CGRectMake(14, 48, panelW - 28, 40);
+    self.status.frame = CGRectMake(16, 92, panelW - 32, 22);
+    CGFloat footerY = panelH - 48;
+    CGFloat buttonW = (panelW - 42) / 2.0;
+    [self.panel viewWithTag:404].frame = CGRectMake(12, 120, panelW - 24, MAX(100.0, footerY - 130));
+    [self.panel viewWithTag:406].frame = CGRectMake(14, footerY, buttonW, 36);
+    [self.panel viewWithTag:407].frame = CGRectMake(28 + buttonW, footerY, buttonW, 36);
 }
 
 - (UIButton *)button:(NSString *)text frame:(CGRect)frame {
@@ -158,28 +197,64 @@ static NSString * const kNovaMods = @"com.nova.modmenu.mods";
 }
 
 - (void)refreshList {
-    for (UIView *v in self.list.arrangedSubviews) { [self.list removeArrangedSubview:v]; [v removeFromSuperview]; }
-    for (NSUInteger i=0; i<self.mods.count; i++) {
-        NSMutableDictionary *m = self.mods[i];
-        UIView *row = [[UIView alloc] initWithFrame:CGRectMake(0,0,self.list.bounds.size.width,42)];
-        row.backgroundColor = [UIColor colorWithWhite:1 alpha:0.07];
-        row.layer.cornerRadius = 7;
-        UILabel *name = [[UILabel alloc] initWithFrame:CGRectMake(9,3,row.bounds.size.width-104,36)];
-        name.text = m[@"name"]; name.textColor = UIColor.whiteColor; name.font = [UIFont systemFontOfSize:11]; name.lineBreakMode = NSLineBreakByTruncatingMiddle;
-        [row addSubview:name];
-        UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectZero]; sw.transform = CGAffineTransformMakeScale(.72,.72); sw.on = [m[@"enabled"] boolValue]; sw.tag = (NSInteger)i;
-        [sw addTarget:self action:@selector(toggleMod:) forControlEvents:UIControlEventValueChanged];
-        sw.frame = CGRectMake(row.bounds.size.width-82,5,48,32); [row addSubview:sw];
-        UIButton *del = [UIButton buttonWithType:UIButtonTypeSystem]; del.frame = CGRectMake(row.bounds.size.width-34,5,30,32); del.tag=(NSInteger)i; [del setTitle:@"−" forState:UIControlStateNormal]; [del setTitleColor:[UIColor colorWithRed:1 green:.4 blue:.4 alpha:1] forState:UIControlStateNormal]; [del addTarget:self action:@selector(deleteMod:) forControlEvents:UIControlEventTouchUpInside]; [row addSubview:del];
-        [self.list addArrangedSubview:row];
-        row.translatesAutoresizingMaskIntoConstraints = NO;
-        [row.heightAnchor constraintEqualToConstant:42].active = YES;
-        [row.widthAnchor constraintEqualToAnchor:self.list.widthAnchor].active = YES;
+    for (UIView *v in self.list.arrangedSubviews) {
+        [self.list removeArrangedSubview:v];
+        [v removeFromSuperview];
     }
-    [self.list layoutIfNeeded];
-    UIScrollView *scroll = [self.panel viewWithTag:404];
-    scroll.contentSize = CGSizeMake(scroll.bounds.size.width, self.list.bounds.size.height);
+    for (NSUInteger i = 0; i < self.mods.count; i++) {
+        NSMutableDictionary *m = self.mods[i];
+        UIView *row = [[UIView alloc] initWithFrame:CGRectZero];
+        row.backgroundColor = [UIColor colorWithWhite:1 alpha:0.08];
+        row.layer.cornerRadius = 9;
+        row.translatesAutoresizingMaskIntoConstraints = NO;
+
+        UILabel *name = [[UILabel alloc] initWithFrame:CGRectZero];
+        name.text = m[@"name"] ?: @"Imported archive";
+        name.textColor = UIColor.whiteColor;
+        name.font = [UIFont systemFontOfSize:12];
+        name.lineBreakMode = NSLineBreakByTruncatingMiddle;
+        name.numberOfLines = 1;
+        name.translatesAutoresizingMaskIntoConstraints = NO;
+        [row addSubview:name];
+
+        UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectZero];
+        sw.on = [m[@"enabled"] boolValue];
+        sw.tag = (NSInteger)i;
+        sw.translatesAutoresizingMaskIntoConstraints = NO;
+        [sw addTarget:self action:@selector(toggleMod:) forControlEvents:UIControlEventValueChanged];
+        [row addSubview:sw];
+
+        UIButton *del = [UIButton buttonWithType:UIButtonTypeSystem];
+        del.tag = (NSInteger)i;
+        [del setTitle:@"×" forState:UIControlStateNormal];
+        del.titleLabel.font = [UIFont systemFontOfSize:25 weight:UIFontWeightMedium];
+        [del setTitleColor:[UIColor colorWithRed:1 green:.48 blue:.48 alpha:1] forState:UIControlStateNormal];
+        del.backgroundColor = [UIColor colorWithWhite:1 alpha:0.07];
+        del.layer.cornerRadius = 8;
+        del.translatesAutoresizingMaskIntoConstraints = NO;
+        del.accessibilityLabel = @"Remove imported archive";
+        [del addTarget:self action:@selector(deleteMod:) forControlEvents:UIControlEventTouchUpInside];
+        [row addSubview:del];
+
+        [NSLayoutConstraint activateConstraints:@[
+            [row.heightAnchor constraintEqualToConstant:54],
+            [name.leadingAnchor constraintEqualToAnchor:row.leadingAnchor constant:10],
+            [name.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+            [name.topAnchor constraintGreaterThanOrEqualToAnchor:row.topAnchor constant:4],
+            [name.bottomAnchor constraintLessThanOrEqualToAnchor:row.bottomAnchor constant:-4],
+            [sw.leadingAnchor constraintGreaterThanOrEqualToAnchor:name.trailingAnchor constant:6],
+            [sw.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+            [del.leadingAnchor constraintEqualToAnchor:sw.trailingAnchor constant:8],
+            [del.trailingAnchor constraintEqualToAnchor:row.trailingAnchor constant:-6],
+            [del.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+            [del.widthAnchor constraintEqualToConstant:42],
+            [del.heightAnchor constraintEqualToConstant:42],
+            [name.widthAnchor constraintGreaterThanOrEqualToConstant:40]
+        ]];
+        [self.list addArrangedSubview:row];
+    }
     if (self.mods.count == 0) self.status.text = @"No archives imported yet.";
+    else self.status.text = @"Switches save manager state; loading needs a compatible game loader.";
 }
 
 - (void)toggleMod:(UISwitch *)sender {
