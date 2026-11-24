@@ -1,0 +1,39 @@
+name: Build NovaModMenu dylib (iOS arm64)
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Theos and iOS SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew install ldid
+          git clone --recursive https://github.com/theos/theos.git "$HOME/theos"
+          echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
+          mkdir -p "$HOME/theos/sdks"
+          curl -L --fail https://github.com/theos/sdks/archive/refs/heads/master.zip -o /tmp/sdks.zip
+          unzip -q /tmp/sdks.zip -d /tmp/nova-sdks
+          SDK_DIR="$(find /tmp/nova-sdks -type d -name 'iPhoneOS*.sdk' -print -quit)"
+          test -n "$SDK_DIR"
+          ln -s "$SDK_DIR" "$HOME/theos/sdks/$(basename "$SDK_DIR")"
+      - name: Build tweak
+        shell: bash
+        run: |
+          set -euo pipefail
+          make clean || true
+          make FINALPACKAGE=1
+          mkdir -p output
+          find .theos -type f -name 'NovaModMenu.dylib' -exec cp {} output/NovaModMenu.dylib \;
+          test -s output/NovaModMenu.dylib
+          file output/NovaModMenu.dylib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NovaModMenu-dylib-arm64
+          path: output/NovaModMenu.dylib
+          if-no-files-found: error
