@@ -21,9 +21,10 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git "$HOME/theos"
           echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
           mkdir -p "$HOME/theos/sdks"
-          curl -L --fail https://github.com/theos/sdks/archive/refs/heads/master.zip -o /tmp/sdks.zip
-          unzip -q /tmp/sdks.zip -d /tmp/nova-sdks
-          SDK_DIR="$(find /tmp/nova-sdks -type d -name 'iPhoneOS*.sdk' -print -quit)"
+          # Clone the SDK repository instead of unzipping its archive: the archive
+          # contains symlinks that macOS hosted runners may reject during extraction.
+          git clone --depth 1 https://github.com/theos/sdks.git /tmp/theos-sdks
+          SDK_DIR="$(find /tmp/theos-sdks -type d -name 'iPhoneOS*.sdk' -print -quit)"
           test -n "$SDK_DIR"
           ln -s "$SDK_DIR" "$HOME/theos/sdks/$(basename "$SDK_DIR")"
       - name: Build tweak
