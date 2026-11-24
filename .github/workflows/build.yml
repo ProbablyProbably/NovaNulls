@@ -4,9 +4,13 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Install Theos and iOS SDK
@@ -29,8 +33,9 @@ jobs:
           make clean || true
           make FINALPACKAGE=1
           mkdir -p output
-          find .theos -type f -name 'NovaModMenu.dylib' -exec cp {} output/NovaModMenu.dylib \;
-          test -s output/NovaModMenu.dylib
+          DYLIB="$(find .theos -type f -name 'NovaModMenu.dylib' -print -quit)"
+          test -n "$DYLIB"
+          cp "$DYLIB" output/NovaModMenu.dylib
           file output/NovaModMenu.dylib
       - uses: actions/upload-artifact@v4
         with:
