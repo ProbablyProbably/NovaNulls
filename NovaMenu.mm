@@ -121,7 +121,7 @@ static NSString * const kNovaMods = @"com.nova.modmenu.mods";
 
 - (void)importArchive {
     UIDocumentPickerViewController *picker;
-    if (@available(iOS 14.0, *)) picker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[UTType.item] asCopy:YES];
+    if (@available(iOS 14.0, *)) picker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[[UTType typeWithIdentifier:@"public.data"]] asCopy:YES];
     else picker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeImport];
     picker.delegate = self;
     picker.allowsMultipleSelection = NO;
